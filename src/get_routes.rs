@@ -1,4 +1,4 @@
-use std::{fs, path::Path};
+use std::{ffi::OsStr, fs, path::Path};
 use urlencoding;
 
 
@@ -114,9 +114,21 @@ async fn get_video_impl(query_string: String, folder: String, filter_range: Opti
         )
     }
 
+    let file_type = Path::new(video_str.clone().as_str())
+        .extension()
+        .and_then(OsStr::to_str)
+        .unwrap()
+        .to_string();
+
+    let mime_type = if file_type == "mkv" {
+        "video/webm"
+    } else {
+        "video/mp4"
+    };
+
     Ok(
         Box::new(
-            get_range(filter_range, video_str.as_str(), "video/mp4").await.unwrap()
+            get_range(filter_range, video_str.as_str(), mime_type).await.unwrap()
         )
     )
 }
