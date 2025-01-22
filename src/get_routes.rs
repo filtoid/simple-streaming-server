@@ -89,7 +89,7 @@ async fn get_file_list_impl(query_string: String, folder: String) -> Result<Box<
                             .and_then(OsStr::to_str)
                             .unwrap()
                             .to_string();
-                        if file_type.to_lowercase() == "mp4"{
+                        if file_type.replace("\"", "").replace("'", "").to_lowercase() == "mp4"{
                             files.push(out_str);
                         }
                     } else {
