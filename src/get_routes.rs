@@ -3,7 +3,7 @@ use urlencoding;
 
 
 use serde_json::json;
-use warp::{Filter, filters::BoxedFilter, Reply, Rejection};
+use warp::{filters::BoxedFilter, Filter, Rejection, Reply};
 use warp_range::{filter_range, get_range};
 
 pub(super) async fn make_routes(folder: &BoxedFilter<(String,)>) -> BoxedFilter<(impl Reply,)> {
@@ -84,7 +84,14 @@ async fn get_file_list_impl(query_string: String, folder: String) -> Result<Box<
                         folders.push(out_str);
                     } else if md.is_file() {
                         let out_str = format!("{:?}", p.file_name()).replace("\\", "/").replace("//",  "/");
-                        files.push(out_str);
+                        let file_type = Path::new(out_str.clone().as_str())
+                            .extension()
+                            .and_then(OsStr::to_str)
+                            .unwrap()
+                            .to_string();
+                        if file_type.to_lowercase() == "mp4"{
+                            files.push(out_str);
+                        }
                     } else {
                         log::error!("Path {:?} is not folder or file", p.path());
                     }
@@ -121,7 +128,7 @@ async fn get_video_impl(query_string: String, folder: String, filter_range: Opti
         .to_string();
 
     let mime_type = if file_type == "mkv" {
-        "video/webm"
+        "video/x-matroska"
     } else {
         "video/mp4"
     };
